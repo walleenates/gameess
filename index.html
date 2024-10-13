@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galaxy Shooter Game</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+            display: none;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #difficulty {
+            padding: 10px;
+            font-size: 16px;
+        }
+        #score, #level, #highScore {
+            margin-top: 10px;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Galaxy Shooter Game</h1>
+    <div>
+        <button id="start-button">Start Game</button>
+        <button id="quit-button" style="display:none;">Quit Game</button>
+        <select id="difficulty">
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+        </select>
+    </div>
+    <canvas id="gameCanvas" width="800" height="600" style="display:none;"></canvas>
+    <div id="score">Score: 0</div>
+    <div id="level">Level: 1</div>
+    <div id="highScore">High Score: 0</div>
+    <div id="shieldTime"></div>
+    
+    
+    
+
+    <script src="script.js"></script>
+</body>
+</html>
