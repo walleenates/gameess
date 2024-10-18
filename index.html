@@ -5,53 +5,352 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Galaxy Shooter Game</title>
     <style>
-        canvas {
-            border: 1px solid black;
-            display: none;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-        }
-        h1 {
-            color: #333;
-        }
-        button {
-            margin: 10px;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        #difficulty {
-            padding: 10px;
-            font-size: 16px;
-        }
-        #score, #level, #highScore {
-            margin-top: 10px;
-            font-size: 20px;
-        }
+       /* General styles */
+/* General styles */
+/* General styles */
+/* General styles */
+body {
+    margin: 0;
+    background: radial-gradient(circle, #000428, #004e92);
+    color: white;
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+}
+
+h1 {
+    font-size: 28px;
+    margin-top: 20px;
+    text-shadow: 1px 1px 4px rgba(255, 255, 255, 0.5);
+}
+
+h2 {
+    font-size: 24px;
+}
+
+/* Game container styles */
+#game-container {
+    display: none;
+    position: relative;
+    margin: 20px auto;
+    overflow: hidden;
+    max-width: 800px; /* Limit maximum width */
+}
+
+#gameCanvas {
+    border: 2px solid white;
+    background: #1a1a1a;
+    width: 100%;
+    height: auto; /* Maintain aspect ratio */
+}
+
+/* Score display */
+#score-container {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 20px;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 5px;
+    border-radius: 5px;
+}
+
+/* Button styles */
+button {
+    padding: 8px 16px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Game Over Screen */
+#game-over {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 20px;
+    border-radius: 10px;
+}
+
+#game-over p {
+    font-size: 20px;
+    margin: 10px 0;
+}
+
+/* Quit button in the game */
+#quit-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #dc3545;
+    border-radius: 5px;
+}
+
+#quit-button:hover {
+    background-color: #c82333;
+}
+
+/* Responsive Styles */
+@media (max-width: 600px) {
+    h1 {
+        font-size: 22px;
+    }
+
+    h2 {
+        font-size: 20px;
+    }
+
+    #score-container {
+        font-size: 16px;
+        padding: 4px;
+    }
+
+    button {
+        padding: 6px 12px;
+        font-size: 14px;
+    }
+
+    #game-over p {
+        font-size: 18px;
+    }
+}
+
+    
     </style>
 </head>
 <body>
-    <h1>Galaxy Shooter Game</h1>
-    <div>
+    <div id="welcome-screen">
+        <h1>Welcome to Galaxy Shooter</h1>
+        <div id="level-selection">
+            <label>Select Level: 
+                <select id="level-select">
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                </select>
+            </label>
+        </div>
         <button id="start-button">Start Game</button>
-        <button id="quit-button" style="display:none;">Quit Game</button>
-        <select id="difficulty">
-            <option value="easy">Easy</option>
-            <option value="medium">Medium</option>
-            <option value="hard">Hard</option>
-        </select>
     </div>
-    <canvas id="gameCanvas" width="800" height="600" style="display:none;"></canvas>
-    <div id="score">Score: 0</div>
-    <div id="level">Level: 1</div>
-    <div id="highScore">High Score: 0</div>
-    <div id="shieldTime"></div>
-    
-    
-    
 
-    <script src="script.js"></script>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        
+        <button id="quit-button">Quit Game</button>
+    </div>
+
+    <div id="game-over">
+        <h2>Game Over</h2>
+        <p>Your Score: <span id="final-score">0</span></p>
+        <button id="restart-button">Restart Game</button>
+    </div>
+
+    <script>
+const startButton = document.getElementById('start-button');
+const quitButton = document.getElementById('quit-button');
+const welcomeScreen = document.getElementById('welcome-screen');
+const gameContainer = document.getElementById('game-container');
+const gameOverScreen = document.getElementById('game-over');
+const restartButton = document.getElementById('restart-button');
+const scoreDisplay = document.getElementById('score');
+const finalScoreDisplay = document.getElementById('final-score');
+const levelSelect = document.getElementById('level-select');
+
+let canvas, ctx, player, enemies, bullets, enemyBullets, gameOver, score, enemySpeed;
+
+startButton.addEventListener('click', startGame);
+quitButton.addEventListener('click', quitGame);
+restartButton.addEventListener('click', restartGame);
+
+function startGame() {
+    const level = levelSelect.value; // Get selected level
+    welcomeScreen.style.display = 'none';
+    gameContainer.style.display = 'block';
+    canvas = document.getElementById('gameCanvas');
+    ctx = canvas.getContext('2d');
+    canvas.width = 800;
+    canvas.height = 600;
+
+    player = {
+        x: canvas.width / 2 - 25,
+        y: canvas.height - 70,
+        width: 50,
+        height: 50,
+        color: 'blue',
+        speed: 5
+    };
+
+    bullets = [];
+    enemies = [];
+    enemyBullets = []; // Initialize enemy bullets array
+    gameOver = false;
+    score = 0;
+
+    // Set enemy speed based on level
+    enemySpeed = level === 'easy' ? 2 : level === 'medium' ? 4 : 6; // Adjust speeds accordingly
+
+    requestAnimationFrame(gameLoop);
+}
+
+function quitGame() {
+    welcomeScreen.style.display = 'block';
+    gameContainer.style.display = 'none';
+    gameOverScreen.style.display = 'none';
+}
+
+function restartGame() {
+    gameOverScreen.style.display = 'none';
+    startGame();
+}
+
+function gameLoop() {
+    if (gameOver) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw player
+    ctx.fillStyle = player.color;
+    ctx.fillRect(player.x, player.y, player.width, player.height);
+
+    // Move and draw bullets
+    bullets.forEach((bullet, index) => {
+        bullet.x += bullet.vx;
+        bullet.y += bullet.vy;
+        if (bullet.y < 0 || bullet.x < 0 || bullet.x > canvas.width || bullet.y > canvas.height) {
+            bullets.splice(index, 1); // Remove bullet if out of bounds
+        }
+        ctx.fillStyle = 'red';
+        ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+    });
+
+    // Move and draw enemies
+    enemies.forEach((enemy, index) => {
+        enemy.y += enemy.vy;
+
+        // Check if enemy hits player
+        if (checkCollision(player, enemy)) {
+            endGame();
+        }
+
+        // Remove enemies out of bounds
+        if (enemy.y > canvas.height) {
+            enemies.splice(index, 1);
+        }
+
+        // Check if bullet hits enemy
+        bullets.forEach((bullet, bIndex) => {
+            if (checkCollision(bullet, enemy)) {
+                score++;
+                bullets.splice(bIndex, 1);
+                enemies.splice(index, 1);
+            }
+        });
+
+        ctx.fillStyle = 'green';
+        ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+
+        // Randomly make the enemy shoot bullets
+        if (Math.random() < 0.02) { // Adjust shooting probability as needed
+            enemyBullets.push({
+                x: enemy.x + enemy.width / 2 - 2.5, // Center the bullet on the enemy
+                y: enemy.y + enemy.height, // Start from the bottom of the enemy
+                width: 5,
+                height: 10,
+                vy: 3 // Speed of enemy bullets
+            });
+        }
+    });
+
+    // Move and draw enemy bullets
+    enemyBullets.forEach((bullet, index) => {
+        bullet.y += bullet.vy;
+
+        // Check if bullet hits player
+        if (checkCollision(player, bullet)) {
+            endGame();
+        }
+
+        // Remove bullets out of bounds
+        if (bullet.y > canvas.height) {
+            enemyBullets.splice(index, 1);
+        }
+
+        ctx.fillStyle = 'orange'; // Change bullet color
+        ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+    });
+
+    // Draw score
+    ctx.fillStyle = 'white';
+    ctx.font = '20px Arial';
+    ctx.fillText(`Score: ${score}`, 10, 30);
+
+    // Player movement
+    if (keys.ArrowLeft && player.x > 0) player.x -= player.speed;
+    if (keys.ArrowRight && player.x + player.width < canvas.width) player.x += player.speed;
+    if (keys.ArrowUp && player.y > 0) player.y -= player.speed;
+    if (keys.ArrowDown && player.y + player.height < canvas.height) player.y += player.speed;
+
+    // Generate enemies from the top
+    if (Math.random() < 0.02) {
+        let x = Math.random() * (canvas.width - 40); // Adjusted for smaller enemy width
+        let y = -40; // Adjusted for smaller enemy height
+        enemies.push({ x, y, width: 40, height: 40, vy: enemySpeed }); // Changed enemy size
+    }
+
+    requestAnimationFrame(gameLoop);
+}
+
+// Key handling
+const keys = {};
+window.addEventListener('keydown', (e) => keys[e.key] = true);
+window.addEventListener('keyup', (e) => keys[e.key] = false);
+
+// Shooting bullets toward enemies
+window.addEventListener('keydown', (e) => {
+    if (e.key === ' ') {
+        // Find the closest enemy
+        if (enemies.length > 0) {
+            const closestEnemy = enemies.reduce((prev, curr) => 
+                Math.abs(player.x - curr.x) < Math.abs(player.x - prev.x) ? curr : prev
+            );
+            const angle = Math.atan2(closestEnemy.y - player.y, closestEnemy.x - player.x);
+            const bulletSpeed = 7;
+            bullets.push({
+                x: player.x + player.width / 2 - 2.5,
+                y: player.y,
+                width: 5,
+                height: 10,
+                vx: bulletSpeed * Math.cos(angle),
+                vy: bulletSpeed * Math.sin(angle)
+            });
+        }
+    }
+});
+
+function checkCollision(rect1, rect2) {
+    return rect1.x < rect2.x + rect2.width &&
+           rect1.x + rect1.width > rect2.x &&
+           rect1.y < rect2.y + rect2.height &&
+           rect1.y + rect1.height > rect2.y;
+}
+
+function endGame() {
+    gameOver = true;
+    gameOverScreen.style.display = 'block';
+    finalScoreDisplay.innerText = score;
+}
+
+    </script>
 </body>
 </html>
+ 

@@ -1,65 +1,63 @@
-body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+* {
     margin: 0;
+    padding: 0;
+    box-sizing: border-box;
     font-family: 'Arial', sans-serif;
-    background: radial-gradient(circle, #1e1e1e, #000);
-    color: #fff;
 }
 
-.container {
+body {
+    background: black;
+    color: white;
     text-align: center;
 }
 
-h1 {
-    margin: 20px;
-    text-shadow: 2px 2px 5px rgba(255, 255, 255, 0.7);
+#welcome-screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100vh;
 }
 
-#gameCanvas {
-    border: 2px solid #fff;
-    background: #000;
-}
-
-#game-controls {
-    margin-bottom: 10px;
-}
-
-button {
+#start-button, #easy-level, #hard-level {
     padding: 10px 20px;
-    margin: 5px;
-    font-size: 16px;
-    background-color: #4caf50; /* Green */
+    margin: 10px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    background-color: #3498db;
+    border: none;
+    color: white;
+}
+
+#game-container {
+    display: none;
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
+    background: black;
+}
+
+canvas {
+    display: block;
+    margin: 0 auto;
+    background-color: #000;
+}
+
+#game-over {
+    display: none;
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    text-align: center;
+}
+
+#restart-button {
+    padding: 10px 20px;
+    margin-top: 20px;
+    font-size: 1.5rem;
+    background-color: #e74c3c;
     color: white;
     border: none;
-    border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-button:hover {
-    background-color: #45a049; /* Darker green */
-}
-
-#quit-button {
-    background-color: #f44336; /* Red */
-}
-
-#quit-button:hover {
-    background-color: #c62828; /* Darker red */
-}
-
-#score-display {
-    font-size: 20px;
-    margin-top: 10px;
-    text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.5);
-}
-
-#leaderboard {
-    margin-top: 20px;
-    background-color: rgba(255, 255, 255, 0.1);
-    padding: 10px;
-    border-radius: 5px;
 }
